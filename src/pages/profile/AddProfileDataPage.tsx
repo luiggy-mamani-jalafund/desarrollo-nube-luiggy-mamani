@@ -37,7 +37,7 @@ export const AddProfileDataPage = () => {
                 const profile = await userProfileRepository.getUserProfile(
                     user.uid,
                 );
-                setHasProfile(!!profile);
+                setHasProfile(!profile);
                 if (profile) {
                     router.push("/");
                 }
