@@ -80,7 +80,7 @@ export const MyPostsPage = () => {
                     <Button
                         variant="primary"
                         className="mt-3"
-                        onClick={() => router.push("/create-post")}
+                        onClick={() => router.push("/posts/create")}
                     >
                         Create New Post
                     </Button>
