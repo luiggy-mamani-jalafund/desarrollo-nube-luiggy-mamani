@@ -19,7 +19,6 @@ export const firebaseDb = getFirestore(firebaseApp);
 
 firebaseAuth.useDeviceLanguage();
 
-// Carga firebaseui dinámicamente solo en el cliente
 let firebaseUi: firebaseui.auth.AuthUI | null = null;
 if (typeof window !== "undefined") {
     import("firebaseui").then((module) => {
