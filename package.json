@@ -13,6 +13,7 @@
     "cloudinary": "^2.6.1",
     "firebase": "^11.9.1",
     "firebaseui": "^6.1.0",
+    "fs": "0.0.1-security",
     "next": "15.3.3",
     "next-cloudinary": "^6.16.0",
     "react": "^19.0.0",

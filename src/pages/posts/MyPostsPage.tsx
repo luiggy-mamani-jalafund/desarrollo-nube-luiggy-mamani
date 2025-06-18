@@ -8,13 +8,11 @@ import Menu from "@/components/Menu";
 import { Container } from "@/components/Container";
 import Card from "@/components/Card";
 import Button from "@/components/Button";
-import { ImageRepository } from "@/repositories/ImageRepository";
 
 export const MyPostsPage = () => {
     const router = useRouter();
     const { user } = useFirebaseUser();
-    const imageRepository = new ImageRepository();
-    const postRepository = new PostRepository(imageRepository);
+    const postRepository = new PostRepository();
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
 
