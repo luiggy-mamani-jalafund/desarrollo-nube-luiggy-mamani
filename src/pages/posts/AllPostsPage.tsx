@@ -70,6 +70,13 @@ export const AllPostsPage = () => {
                     ) : (
                         posts.map((post) => (
                             <div key={post.id} className="border-b py-2">
+                                {post.imageUrl && (
+                                    <img
+                                        src={post.imageUrl}
+                                        alt="Post image"
+                                        className="max-w-full h-auto mb-2"
+                                    />
+                                )}
                                 <p>{post.content}</p>
                                 <p className="text-sm text-gray-500">
                                     Posted on:{" "}
