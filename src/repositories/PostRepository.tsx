@@ -15,21 +15,26 @@ import { toast } from "react-toastify";
 export class PostRepository {
     collectionName = "posts";
 
+    async deleteImage(imageUrl: string): Promise<void> {
+        const response = await fetch("/api/delete-image", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: imageUrl }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete image");
+        }
+    }
+
     async uploadImage(file: File): Promise<string> {
         const formData = new FormData();
         formData.append("image", file);
 
-        const response = await toast.promise(
-            fetch("/api/upload-image", {
-                method: "POST",
-                body: formData,
-            }),
-            {
-                pending: "Uploading image",
-                error: "Failed to upload image",
-                success: "Uploaded",
-            },
-        );
+        const response = await fetch("/api/upload-image", {
+            method: "POST",
+            body: formData,
+        });
 
         if (!response.ok) {
             throw new Error("Failed to upload image");
@@ -69,6 +74,9 @@ export class PostRepository {
                     pending: "Crating post",
                     error: "Something bad happened",
                     success: "Created",
+                },
+                {
+                    toastId: "create_post_id",
                 },
             );
 
@@ -120,7 +128,34 @@ export class PostRepository {
     async deletePost(postId: string): Promise<void> {
         try {
             const postRef = doc(firebaseDb, this.collectionName, postId);
-            await deleteDoc(postRef);
+            const postSnap = await getDoc(postRef);
+            if (postSnap.exists() && postSnap.data().imageUrl) {
+                const imageUrl: string = postSnap.data().imageUrl;
+                await toast.promise(
+                    this.deleteImage(imageUrl),
+                    {
+                        pending: "Deleting image",
+                        error: "Error during the image deletion",
+                        success: "Post image deleted",
+                    },
+                    {
+                        toastId: "delete_image_id",
+                    },
+                );
+            }
+
+            await toast.promise(
+                deleteDoc(postRef),
+                {
+                    pending: "Deleting post",
+                    error: "Error during the deletion process of the post",
+                    success: "Deleted",
+                },
+                {
+                    toastId: "post_delete_id",
+                },
+            );
+
             console.log("Post deleted with ID: ", postId);
         } catch (e) {
             console.error("Error deleting post: ", e);
