@@ -46,9 +46,9 @@ export class PostRepository {
                 imageUrl = await toast.promise(
                     this.uploadImage(image),
                     {
-                        pending: "Uploading image",
-                        error: "Something bad happened during the image uploading process",
-                        success: "Uploaded",
+                        pending: "Creating post",
+                        error: "Something bad happened during the post creation process",
+                        success: "Created",
                     },
                     {
                         toastId: "cloundary_id_toast",
