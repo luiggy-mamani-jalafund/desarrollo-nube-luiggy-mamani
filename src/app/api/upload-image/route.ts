@@ -1,4 +1,8 @@
-import { v2 as cloudinary } from "cloudinary";
+import {
+    v2 as cloudinary,
+    UploadApiErrorResponse,
+    UploadApiResponse,
+} from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
 
 cloudinary.config({
@@ -7,42 +11,49 @@ cloudinary.config({
     api_secret: process.env.NEXT_PUBLIC_SECRET_KEY,
 });
 
-export async function POST(request: NextRequest) {
-    try {
-        const formData = await request.formData();
-        const file = formData.get("image") as File;
+type UploadResponse =
+    | { success: true; result?: UploadApiResponse }
+    | { success: false; error: UploadApiErrorResponse };
 
-        if (!file) {
-            return NextResponse.json(
-                { error: "No image provided" },
-                { status: 400 },
-            );
-        }
+const uploadToCloudinary = (
+    fileUri: string,
+    fileName: string,
+): Promise<UploadResponse> => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader
+            .upload(fileUri, {
+                invalidate: true,
+                resource_type: "auto",
+                filename_override: fileName,
+                folder: "product-images",
+                use_filename: true,
+            })
+            .then((result) => {
+                resolve({ success: true, result });
+            })
+            .catch((error) => {
+                reject({ success: false, error });
+            });
+    });
+};
 
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const uploadResult = await new Promise((resolve, reject) => {
-            cloudinary.uploader
-                .upload_stream(
-                    {
-                        folder: "posts",
-                        public_id: `post_${Date.now()}`,
-                    },
-                    (error: any, result: any) => {
-                        if (error) return reject(error);
-                        resolve(result);
-                    },
-                )
-                .end(buffer);
-        });
+export async function POST(req: NextRequest) {
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
 
+    const fileBuffer = await file.arrayBuffer();
+
+    const mimeType = file.type;
+    const encoding = "base64";
+    const base64Data = Buffer.from(fileBuffer).toString("base64");
+    const fileUri = "data:" + mimeType + ";" + encoding + "," + base64Data;
+
+    const res = await uploadToCloudinary(fileUri, file.name);
+
+    if (res.success && res.result) {
         return NextResponse.json({
-            imageUrl: (uploadResult as any).secure_url,
+            message: "success",
+            imgUrl: res.result.secure_url,
         });
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        return NextResponse.json(
-            { error: "Failed to upload image" },
-            { status: 500 },
-        );
-    }
+    } else return NextResponse.json({ message: "failure" });
 }

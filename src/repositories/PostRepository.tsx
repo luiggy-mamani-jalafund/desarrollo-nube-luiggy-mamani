@@ -12,54 +12,46 @@ import {
 } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { v2 as cloudinary } from "cloudinary";
+import { ImageRepository } from "./ImageRepository";
 
 export class PostRepository {
     collectionName = "posts";
+    imageRepository: ImageRepository;
 
-    async uploadImage(file: File): Promise<string> {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const response = await toast.promise(
-            fetch("/api/upload-image", {
-                method: "POST",
-                body: formData,
-            }),
-            {
-                pending: "Uploading image",
-                error: "Failed to upload image",
-                success: "Uploaded",
-            },
-        );
-
-        if (!response.ok) {
-            throw new Error("Failed to upload image");
-        }
-
-        const data = await response.json();
-        return data.imageUrl;
+    constructor(imageRepository: ImageRepository) {
+        this.imageRepository = imageRepository;
     }
 
-    async addPost(post: Post, image?: File): Promise<Post> {
+    async addPost(post: Post, image?: File | Blob): Promise<Post> {
         try {
             let imageUrl: string | undefined;
             if (image) {
-                imageUrl = await this.uploadImage(image);
+                imageUrl = await toast.promise(
+                    this.imageRepository.uploadStagedFile(image),
+                    {
+                        pending: "Uploading image",
+                        error: "Something bad happened during the image uploading process",
+                        success: "Uploaded",
+                    },
+                );
             }
 
             if (post.id) {
                 delete post.id;
             }
 
-            const docRef = await addDoc(
-                collection(firebaseDb, this.collectionName),
-                {
+            const docRef = await toast.promise(
+                addDoc(collection(firebaseDb, this.collectionName), {
                     ...post,
                     imageUrl,
+                }),
+                {
+                    pending: "Crating post",
+                    error: "Something bad happened",
+                    success: "Created",
                 },
             );
 
-            console.log("Post written with ID: ", docRef.id);
             return {
                 ...post,
                 id: docRef.id,
