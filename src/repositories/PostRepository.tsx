@@ -43,11 +43,17 @@ export class PostRepository {
         try {
             let imageUrl: string | undefined;
             if (image) {
-                imageUrl = await toast.promise(this.uploadImage(image), {
-                    pending: "Uploading image",
-                    error: "Something bad happened during the image uploading process",
-                    success: "Uploaded",
-                });
+                imageUrl = await toast.promise(
+                    this.uploadImage(image),
+                    {
+                        pending: "Uploading image",
+                        error: "Something bad happened during the image uploading process",
+                        success: "Uploaded",
+                    },
+                    {
+                        toastId: "cloundary_id_toast",
+                    },
+                );
             }
 
             if (post.id) {
