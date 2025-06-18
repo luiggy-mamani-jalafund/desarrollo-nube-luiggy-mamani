@@ -51,7 +51,6 @@ export const useFirebaseUser = () => {
     ) => {
         createUserWithEmailAndPassword(firebaseAuth, email, password)
             .then((userCredential) => {
-                // Registered and Signed in
                 const user = userCredential.user;
 
                 console.log("User signed in:", user);

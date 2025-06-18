@@ -5,4 +5,5 @@ export interface Post {
     date: Timestamp;
     content: string;
     userId: string;
+    imageUrl?: string;
 }
